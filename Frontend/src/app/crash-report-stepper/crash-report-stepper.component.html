@@ -1,0 +1,138 @@
+<div xmlns="http://www.w3.org/1999/html">
+  <mat-stepper [linear]="isLinear" #stepper>
+    <mat-step [stepControl]="firstFormGroup">
+      <form [formGroup]="firstFormGroup" style="display: flex; flex-direction: column;">
+        <ng-template matStepLabel>Standort des Unfalls</ng-template>
+        <div *ngIf="!useCoordinates" style="display: flex; flex-direction: column">
+        <mat-form-field>
+          <mat-label>Strasse</mat-label>
+          <input  matInput placeholder="Hauptstrasse 10" [value]="street" formControlName="firstCtrl" >
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Ort</mat-label>
+          <input matInput placeholder="Zürich" [value]="city" formControlName="firstCtrl" >
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Land</mat-label>
+          <input matInput placeholder="Schweiz" [value]="country" formControlName="firstCtrl" >
+        </mat-form-field>
+      </div>
+        <div *ngIf="useCoordinates; else useAddress" style="display: flex; flex-direction: row">
+          <button mat-mini-fab color="primary" aria-label="GetCurrentLocation" (click)="getGeoLocation()">
+            <mat-icon> location_on</mat-icon>
+          </button>
+          <p style="color: white; margin-left: 20px; margin-top: 10px;">Addresse verwenden</p>
+        </div>
+        <ng-template #useAddress>
+          <div  style="flex-direction: row; display: flex">
+          <button mat-mini-fab color="primary" aria-label="GetCurrentLocation" (click)="getGeoLocation()">
+            <mat-icon> location_on</mat-icon>
+          </button>
+          <p style="color: white; margin-left: 20px;  margin-top: 10px;">Koordinaten verwenden</p>
+          </div>
+        </ng-template>
+
+        <div *ngIf="latitude && longitude && useCoordinates">
+          <mat-form-field>
+            <mat-label>Breitengrad</mat-label>
+            <input matInput [value]="latitude">
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Längengrad</mat-label>
+            <input matInput [value]="longitude">
+          </mat-form-field>
+          <div style="background-color: orange; display: flex; flex-direction: column; padding: 10px; border-radius: 10px;  padding-top: 15px; margin-bottom: 20px; margin-top: 20px ">
+            <h4>Bei Notfällen wählen Sie bitte die Notrufnummer 112</h4> <br>
+          </div>
+        </div>
+        <div>
+          <button mat-button color="accent" matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+
+    <mat-step [stepControl]="secondFormGroup" label="Persönliche Daten">
+      <div style="display: flex; flex-direction: column">
+      <form [formGroup]="secondFormGroup">
+        <div style="display: flex; flex-direction: column; margin-top: 20px">
+        <mat-form-field>
+          <mat-label>Vorname</mat-label>
+          <input matInput placeholder="Vorname" [value]="user.firstName" formControlName="secondCtrl" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Nachname</mat-label>
+          <input matInput placeholder="Nachname" [value]="user.lastName" formControlName="secondCtrl" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>E-Mail Adresse</mat-label>
+          <input matInput placeholder="E-Mail" [value]="user.email" formControlName="secondCtrl" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Tel</mat-label>
+          <input matInput placeholder="Tel" [value]="user.phoneNumber" formControlName="numberCtrl" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Addresse</mat-label>
+          <input matInput formControlName="secondCtrl" [value]="user.address" placeholder="Hauptstrasse 10" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Land</mat-label>
+          <input matInput placeholder="Schweiz" [value]="user.land" formControlName="secondCtrl" required>
+        </mat-form-field>
+        </div>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button color="accent" matStepperNext>Next</button>
+        </div>
+      </form>
+      </div>
+    </mat-step>
+    <mat-step [stepControl]="thirdFormGroup" [completed]="numberPlateError === ''">
+      <ng-template matStepLabel>Angaben zum Auto</ng-template>
+      <div style="display: flex; flex-direction: column">
+        <mat-form-field>
+          <input matInput placeholder="Swiss Number Plate" [(ngModel)]="car.carNumberplate" (input)="validateNumberPlate()">
+          <mat-hint align="end" style="color:white">{{ car.carNumberplate?.length }}/max. 8 characters</mat-hint>
+          <mat-error *ngIf="numberPlateError">{{ numberPlateError }}</mat-error>
+        </mat-form-field>
+        <span style="color: orange">{{numberPlateError}}</span>
+        <button mat-button (click)="getCarInfos()">Fahrzeugdaten abrufen</button>
+        <div *ngIf="vehicleData" style="color: white">
+          {{vehicleData | async | json}}
+        </div>
+      </div>
+      <button mat-button matStepperPrevious>Back</button>
+      <button mat-button color="accent" matStepperNext>Next</button>
+    </mat-step>
+    <mat-step [stepControl]="fourthFormGroup">
+      <ng-template matStepLabel>Abschleppdienst</ng-template>
+      <div >
+      <h3 style="color: white">Wenn ein Abschleppdienst benötigt wird rufen sie 041 228 94 94 an</h3>
+      <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </mat-step>
+    <mat-step [stepControl]="fifthFormGroup">
+      <ng-template matStepLabel>Unfallgegner</ng-template>
+      <p>Gibt es Daten vom Unfallgegner</p>
+      <button mat-button matStepperPrevious>Nein</button>
+      <button mat-button matStepperNext>Ja</button>
+      <button mat-button matStepperPrevious>Back</button>
+    </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Angaben zum Schaden</ng-template>
+      <p>Geben Sie Angaben zu dem Schaden</p>
+      <button mat-button matStepperPrevious>Nein</button>
+      <button mat-button matStepperNext>Ja</button>
+      <button mat-button matStepperPrevious>Back</button>
+    </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Done</ng-template>
+      <p>You are now done.</p>
+      <div>
+        <button mat-button (click)="submitPersonalData()">Submit</button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+</div>
